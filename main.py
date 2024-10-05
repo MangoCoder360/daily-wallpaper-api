@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from openai import OpenAI
 import requests, dotenv, os, time
 
@@ -16,6 +17,7 @@ last_updated_date = time.localtime().tm_mday
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 app = Flask(__name__)
+CORS(app)
 
 def create_wallpaper_description(image_url, location):
     system_prompt = '''
@@ -96,7 +98,7 @@ def set_new_wallpaper():
         "description": description
     }
 
-@app.route('/api/daily_wallpaper')
+@app.route('/api/daily-wallpaper')
 def daily_wallpaper():
     global current_wallpaper, last_updated_date
 
@@ -108,7 +110,7 @@ def daily_wallpaper():
 
     return current_wallpaper
 
-@app.route('/api/reset_wallpaper')
+@app.route('/api/reset-wallpaper')
 def reset_wallpaper():
     set_new_wallpaper()
     return "200 OK"
