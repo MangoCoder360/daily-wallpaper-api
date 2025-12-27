@@ -87,9 +87,8 @@ def create_wallpaper_description(image_url, location):
 
     return description
 
-def set_new_wallpaper():
-    global current_wallpaper
-
+def fetch_wallpaper_data():
+    """Helper function to fetch wallpaper data from Unsplash API."""
     url = "https://api.unsplash.com/photos/random?orientation=landscape&topics=6sMVjTLSkeQ&client_id=" + UNSPLASH_ACCESS_KEY
     response = requests.get(url)
     data = response.json()
@@ -100,28 +99,18 @@ def set_new_wallpaper():
 
     description = create_wallpaper_description(regular_url, location)
 
-    current_wallpaper = {
+    return {
         "url": full_url,
         "description": description
     }
+
+def set_new_wallpaper():
+    global current_wallpaper
+    current_wallpaper = fetch_wallpaper_data()
 
 def set_new_hourly_wallpaper():
     global hourly_wallpaper
-
-    url = "https://api.unsplash.com/photos/random?orientation=landscape&topics=6sMVjTLSkeQ&client_id=" + UNSPLASH_ACCESS_KEY
-    response = requests.get(url)
-    data = response.json()
-
-    full_url = data['urls']['full']
-    regular_url = data['urls']['regular']
-    location = data['location']['name']
-
-    description = create_wallpaper_description(regular_url, location)
-
-    hourly_wallpaper = {
-        "url": full_url,
-        "description": description
-    }
+    hourly_wallpaper = fetch_wallpaper_data()
 
 @app.route('/api/daily-wallpaper')
 def daily_wallpaper():
