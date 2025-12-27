@@ -14,6 +14,13 @@ current_wallpaper = {
 
 last_updated_date = time.localtime().tm_mday
 
+hourly_wallpaper = {
+    "url": None,
+    "description": None
+}
+
+last_updated_hour = time.localtime().tm_hour
+
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 app = Flask(__name__)
@@ -98,6 +105,24 @@ def set_new_wallpaper():
         "description": description
     }
 
+def set_new_hourly_wallpaper():
+    global hourly_wallpaper
+
+    url = "https://api.unsplash.com/photos/random?orientation=landscape&topics=6sMVjTLSkeQ&client_id=" + UNSPLASH_ACCESS_KEY
+    response = requests.get(url)
+    data = response.json()
+
+    full_url = data['urls']['full']
+    regular_url = data['urls']['regular']
+    location = data['location']['name']
+
+    description = create_wallpaper_description(regular_url, location)
+
+    hourly_wallpaper = {
+        "url": full_url,
+        "description": description
+    }
+
 @app.route('/api/daily-wallpaper')
 def daily_wallpaper():
     global current_wallpaper, last_updated_date
@@ -115,6 +140,24 @@ def reset_wallpaper():
     set_new_wallpaper()
     return "200 OK"
 
+@app.route('/api/hourly-wallpaper')
+def hourly_wallpaper_route():
+    global hourly_wallpaper, last_updated_hour
+
+    current_hour = time.localtime().tm_hour
+
+    if current_hour != last_updated_hour:
+        set_new_hourly_wallpaper()
+        last_updated_hour = current_hour
+
+    return hourly_wallpaper
+
+@app.route('/api/reset-hourly-wallpaper')
+def reset_hourly_wallpaper():
+    set_new_hourly_wallpaper()
+    return "200 OK"
+
 if __name__ == '__main__':
     set_new_wallpaper()
+    set_new_hourly_wallpaper()
     app.run(host="0.0.0.0", port=5509)
