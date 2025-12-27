@@ -95,7 +95,7 @@ def fetch_wallpaper_data():
 
     full_url = data['urls']['full']
     regular_url = data['urls']['regular']
-    location = data['location']['name']
+    location = data.get('location', {}).get('name', None) if data.get('location') else None
 
     description = create_wallpaper_description(regular_url, location)
 
