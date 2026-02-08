@@ -2,24 +2,32 @@ from flask import Flask
 from flask_cors import CORS
 from openai import OpenAI
 import requests, dotenv, os, time
+from datetime import datetime
+import pytz
 
 dotenv.load_dotenv()
 
 UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
+TIMEZONE = os.getenv('TIMEZONE', 'America/Los_Angeles')  # Default to Pacific Time if not set
+
+def get_current_time():
+    """Get current time in the configured timezone."""
+    tz = pytz.timezone(TIMEZONE)
+    return datetime.now(tz)
 
 current_wallpaper = {
     "url": None,
     "description": None
 }
 
-last_updated_date = time.localtime().tm_mday
+last_updated_date = get_current_time().day
 
 hourly_wallpaper = {
     "url": None,
     "description": None
 }
 
-last_updated_hour = time.localtime().tm_hour
+last_updated_hour = get_current_time().hour
 
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -116,7 +124,7 @@ def set_new_hourly_wallpaper():
 def daily_wallpaper():
     global current_wallpaper, last_updated_date
 
-    current_date = time.localtime().tm_mday
+    current_date = get_current_time().day
 
     if current_date != last_updated_date:
         set_new_wallpaper()
@@ -133,7 +141,7 @@ def reset_wallpaper():
 def hourly_wallpaper_route():
     global hourly_wallpaper, last_updated_hour
 
-    current_hour = time.localtime().tm_hour
+    current_hour = get_current_time().hour
 
     if current_hour != last_updated_hour:
         set_new_hourly_wallpaper()
@@ -149,4 +157,4 @@ def reset_hourly_wallpaper():
 if __name__ == '__main__':
     set_new_wallpaper()
     set_new_hourly_wallpaper()
-    app.run(host="0.0.0.0", port=5509)
+    app.run(host="0.0.0.0", port=5510)
