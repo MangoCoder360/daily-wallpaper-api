@@ -68,30 +68,34 @@ def create_wallpaper_description(image_url, location):
     if location == None:
         location = "location not specified"
 
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {
-                "role": "system",
-                "content": system_prompt
-            },
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "Location: " + location},
-                    {
-                    "type": "image_url",
-                    "image_url": {
-                        "url": image_url,
-                    },
-                    },
-                ],
-            }
-        ],
-        max_tokens=500
-    )
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Location: " + location},
+                        {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_url,
+                        },
+                        },
+                    ],
+                }
+            ],
+            max_tokens=500
+        )
 
-    description = response.choices[0].message.content
+        description = response.choices[0].message.content
+    except Exception as e:
+        print("Error generating description:", e)
+        description = "Description not available."
 
     return description
 
